@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="MAIN" Id="{de57e75b-7bea-43e6-921a-e8965bfbf84e}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+	axis : AXIS_REF;
+	
+	mc_readdrvaddr : MC_ReadDriveAddress;
+	
+	ton : TON := (PT:=T#1S);
+	t_driveaddr: Tc2_MC2.ST_DriveAddress;
+	
+	ads_rd : ADSREAD;
+	s_drv_name : STRING;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[ton(IN := TRUE);
+
+mc_readdrvaddr(
+	Axis:= axis, 
+	Execute:= ton.Q, 
+	Done=> , 
+	Busy=> , 
+	Error=> , 
+	ErrorID=> , 
+	DriveAddress=> t_driveaddr);
+	
+ads_rd(
+	PORT:= 10, // TcCOM Object Server: https://infosys.beckhoff.com/content/1033/tc3_ads_intro/116159883.html 
+	IDXGRP:= t_driveaddr.TcDriveObjectId, 
+	IDXOFFS:= 16#00000101, // C:\TwinCAT\3.1\sdk\Include\TcServices.h  Line 336
+	LEN:= SIZEOF(s_drv_name), 
+	DESTADDR:= ADR(s_drv_name), 
+	READ:= mc_readdrvaddr.Done, 
+	TMOUT:= , 
+	BUSY=> , 
+	ERR=> , 
+	ERRID=> );]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>
